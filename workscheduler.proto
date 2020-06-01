@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package workscheduler;
+
+import "google/protobuf/timestamp.proto";
+
+// Interface exported by the work server
+service WorkScheduler {
+
+  // Retrieve work to be performed
+  rpc poll() returns (Work) {}
+
+  // confirm that work scheduler is alive
+  rpc ping() returns (Pong) {}
+
+  // report to work scheduler that a work item failed
+  rpc failed(WorkSource) returns () {}
+
+  // report to work scheduler that a work item is completed
+  rpc complete(WorkSource) returns (WorkOutput) {}
+
+  // cause work scheduler to exit
+  rpc quit() return () {}
+
+  // cause work scheduler to stop providing work
+  rpc stop() returns () {}
+
+  rpc lag() return (Lag) {}
+}
+
+message Pong {
+}
+
+// Work - a description of the work item to process
+message Work {
+ 
+  // describes the source of the work.
+  WorkSource data = 1;
+
+   // describes the work to perform. 
+  bytes data = 2;     
+
+  // describes directions on how to perform the work
+  bytes directions = 3; 
+
+  // describes if the work *may* have been attempted before
+  boolean reattempt = 4;
+}
+
+message WorkSource {
+  // describes the source of the work.  May encode the kafka topic and partition and offset.
+  string source = 1;
+}
+
+// Lag - how much the work scheduler is lagging
+message Lag {
+  // the timestamp of the oldest message not yet processed
+  google.protobuf.Timestamp my_field = 1;
+}
+
+message WorkOutput {
+  KafkaOutput id = 1;
+}
+
+message KafkaOutput {
+  repeated KafkaTopicMessages kafkaTopicMessages = 1;
+}
+
+message KafkaTopicMessages {
+  string topicName = 1;
+  repeated KafkaPartitionMessages partitionMessages = 2;
+}
+
+message KafkaPartitionMessages {
+  int32 partition = 1;
+  repeated KafkaMessage messages = 2;
+}
+
+message KafkaMessage {
+  bytes data = 1;
+}
