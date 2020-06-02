@@ -3,6 +3,7 @@ syntax = "proto3";
 package workscheduler;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 
 option go_package = "tidepool.org/workscheduler/workscheduler";
 
@@ -10,27 +11,24 @@ option go_package = "tidepool.org/workscheduler/workscheduler";
 service WorkScheduler {
 
   // Retrieve work to be performed
-  rpc Poll(None) returns (Work) {}
+  rpc Poll(google.protobuf.Empty) returns (Work) {}
 
   // confirm that work scheduler is alive
-  rpc Ping(None) returns (None) {}
+  rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty) {}
 
   // report to work scheduler that a work item failed
-  rpc Failed(WorkSource) returns (None) {}
+  rpc Failed(WorkSource) returns (google.protobuf.Empty) {}
 
   // report to work scheduler that a work item is completed
   rpc Complete(WorkSource) returns (WorkOutput) {}
 
   // cause work scheduler to exit
-  rpc Quit(None) returns (None) {}
+  rpc Quit(google.protobuf.Empty) returns (google.protobuf.Empty) {}
 
   // cause work scheduler to stop providing work
-  rpc Stop(None) returns (None) {}
+  rpc Stop(google.protobuf.Empty) returns (google.protobuf.Empty) {}
 
-  rpc Lag(None) returns (LagResponse) {}
-}
-
-message None {
+  rpc Lag(google.protobuf.Empty) returns (LagResponse) {}
 }
 
 // Work - a description of the work item to process

@@ -7,6 +7,7 @@ import (
 	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -24,37 +25,6 @@ var _ = math.Inf
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
-
-type None struct {
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *None) Reset()         { *m = None{} }
-func (m *None) String() string { return proto.CompactTextString(m) }
-func (*None) ProtoMessage()    {}
-func (*None) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ff451baf5daa9bda, []int{0}
-}
-
-func (m *None) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_None.Unmarshal(m, b)
-}
-func (m *None) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_None.Marshal(b, m, deterministic)
-}
-func (m *None) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_None.Merge(m, src)
-}
-func (m *None) XXX_Size() int {
-	return xxx_messageInfo_None.Size(m)
-}
-func (m *None) XXX_DiscardUnknown() {
-	xxx_messageInfo_None.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_None proto.InternalMessageInfo
 
 // Work - a description of the work item to process
 type Work struct {
@@ -75,7 +45,7 @@ func (m *Work) Reset()         { *m = Work{} }
 func (m *Work) String() string { return proto.CompactTextString(m) }
 func (*Work) ProtoMessage()    {}
 func (*Work) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ff451baf5daa9bda, []int{1}
+	return fileDescriptor_ff451baf5daa9bda, []int{0}
 }
 
 func (m *Work) XXX_Unmarshal(b []byte) error {
@@ -136,7 +106,7 @@ func (m *WorkSource) Reset()         { *m = WorkSource{} }
 func (m *WorkSource) String() string { return proto.CompactTextString(m) }
 func (*WorkSource) ProtoMessage()    {}
 func (*WorkSource) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ff451baf5daa9bda, []int{2}
+	return fileDescriptor_ff451baf5daa9bda, []int{1}
 }
 
 func (m *WorkSource) XXX_Unmarshal(b []byte) error {
@@ -177,7 +147,7 @@ func (m *LagResponse) Reset()         { *m = LagResponse{} }
 func (m *LagResponse) String() string { return proto.CompactTextString(m) }
 func (*LagResponse) ProtoMessage()    {}
 func (*LagResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ff451baf5daa9bda, []int{3}
+	return fileDescriptor_ff451baf5daa9bda, []int{2}
 }
 
 func (m *LagResponse) XXX_Unmarshal(b []byte) error {
@@ -216,7 +186,7 @@ func (m *WorkOutput) Reset()         { *m = WorkOutput{} }
 func (m *WorkOutput) String() string { return proto.CompactTextString(m) }
 func (*WorkOutput) ProtoMessage()    {}
 func (*WorkOutput) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ff451baf5daa9bda, []int{4}
+	return fileDescriptor_ff451baf5daa9bda, []int{3}
 }
 
 func (m *WorkOutput) XXX_Unmarshal(b []byte) error {
@@ -255,7 +225,7 @@ func (m *KafkaOutput) Reset()         { *m = KafkaOutput{} }
 func (m *KafkaOutput) String() string { return proto.CompactTextString(m) }
 func (*KafkaOutput) ProtoMessage()    {}
 func (*KafkaOutput) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ff451baf5daa9bda, []int{5}
+	return fileDescriptor_ff451baf5daa9bda, []int{4}
 }
 
 func (m *KafkaOutput) XXX_Unmarshal(b []byte) error {
@@ -295,7 +265,7 @@ func (m *KafkaTopicMessages) Reset()         { *m = KafkaTopicMessages{} }
 func (m *KafkaTopicMessages) String() string { return proto.CompactTextString(m) }
 func (*KafkaTopicMessages) ProtoMessage()    {}
 func (*KafkaTopicMessages) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ff451baf5daa9bda, []int{6}
+	return fileDescriptor_ff451baf5daa9bda, []int{5}
 }
 
 func (m *KafkaTopicMessages) XXX_Unmarshal(b []byte) error {
@@ -342,7 +312,7 @@ func (m *KafkaPartitionMessages) Reset()         { *m = KafkaPartitionMessages{}
 func (m *KafkaPartitionMessages) String() string { return proto.CompactTextString(m) }
 func (*KafkaPartitionMessages) ProtoMessage()    {}
 func (*KafkaPartitionMessages) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ff451baf5daa9bda, []int{7}
+	return fileDescriptor_ff451baf5daa9bda, []int{6}
 }
 
 func (m *KafkaPartitionMessages) XXX_Unmarshal(b []byte) error {
@@ -388,7 +358,7 @@ func (m *KafkaMessage) Reset()         { *m = KafkaMessage{} }
 func (m *KafkaMessage) String() string { return proto.CompactTextString(m) }
 func (*KafkaMessage) ProtoMessage()    {}
 func (*KafkaMessage) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ff451baf5daa9bda, []int{8}
+	return fileDescriptor_ff451baf5daa9bda, []int{7}
 }
 
 func (m *KafkaMessage) XXX_Unmarshal(b []byte) error {
@@ -417,7 +387,6 @@ func (m *KafkaMessage) GetData() []byte {
 }
 
 func init() {
-	proto.RegisterType((*None)(nil), "workscheduler.None")
 	proto.RegisterType((*Work)(nil), "workscheduler.Work")
 	proto.RegisterType((*WorkSource)(nil), "workscheduler.WorkSource")
 	proto.RegisterType((*LagResponse)(nil), "workscheduler.LagResponse")
@@ -433,39 +402,39 @@ func init() {
 }
 
 var fileDescriptor_ff451baf5daa9bda = []byte{
-	// 501 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x93, 0xc1, 0x6e, 0xd3, 0x40,
-	0x10, 0x86, 0xe3, 0xc4, 0x84, 0x74, 0xd2, 0x1e, 0xd8, 0x48, 0x55, 0x08, 0x08, 0xc2, 0x0a, 0x24,
-	0xab, 0x07, 0x47, 0x18, 0x21, 0x2a, 0x8e, 0x05, 0xf5, 0x42, 0x29, 0xed, 0xa6, 0x12, 0x12, 0x17,
-	0xd8, 0xc6, 0x1b, 0xb3, 0x8a, 0x9d, 0x59, 0x79, 0xd7, 0x42, 0x7d, 0x02, 0x0e, 0x3c, 0x01, 0x6f,
-	0x8b, 0xbc, 0x8e, 0xe3, 0x38, 0x75, 0x50, 0x7b, 0xb3, 0x67, 0xbe, 0x7f, 0xe7, 0x9f, 0xd1, 0x0c,
-	0x0c, 0x7e, 0x61, 0xba, 0xd0, 0xb3, 0x9f, 0x22, 0xcc, 0x62, 0x91, 0xfa, 0x2a, 0x45, 0x83, 0xe4,
-	0xa0, 0x16, 0x1c, 0x3d, 0x8f, 0x10, 0xa3, 0x58, 0x4c, 0x6c, 0xf2, 0x3a, 0x9b, 0x4f, 0x8c, 0x4c,
-	0x84, 0x36, 0x3c, 0x51, 0x05, 0x4f, 0xbb, 0xe0, 0x9e, 0xe3, 0x52, 0xd0, 0x3f, 0x0e, 0xb8, 0x5f,
-	0x31, 0x5d, 0x90, 0xd7, 0xd0, 0xd5, 0x98, 0xa5, 0x33, 0x31, 0x74, 0xc6, 0x8e, 0xd7, 0x0f, 0x1e,
-	0xfb, 0xf5, 0x32, 0x39, 0x34, 0xb5, 0x00, 0x5b, 0x81, 0x84, 0x80, 0x1b, 0x72, 0xc3, 0x87, 0xed,
-	0xb1, 0xe3, 0xed, 0x33, 0xfb, 0x4d, 0x9e, 0x01, 0x84, 0x32, 0x15, 0x33, 0x23, 0x71, 0xa9, 0x87,
-	0x1d, 0x9b, 0xd9, 0x88, 0x90, 0xa7, 0xb0, 0x97, 0x0a, 0x6e, 0x8c, 0x48, 0x94, 0x19, 0xba, 0x63,
-	0xc7, 0xeb, 0xb1, 0x2a, 0x40, 0x5f, 0x02, 0x54, 0x75, 0xc8, 0x61, 0xcd, 0xd2, 0x5e, 0x59, 0x97,
-	0x7e, 0x84, 0xfe, 0x19, 0x8f, 0x98, 0xd0, 0x0a, 0x97, 0x5a, 0x90, 0xb7, 0xd0, 0x4b, 0x6e, 0xbe,
-	0xcf, 0xa5, 0x88, 0xc3, 0x95, 0xf7, 0x91, 0x5f, 0xb4, 0xef, 0x97, 0xed, 0xfb, 0x57, 0x65, 0xfb,
-	0xec, 0x61, 0x72, 0x73, 0x9a, 0xa3, 0xf4, 0xb8, 0xa8, 0xf5, 0x25, 0x33, 0x2a, 0x33, 0xe4, 0x08,
-	0xda, 0xb2, 0x92, 0xd7, 0x5b, 0xff, 0xc4, 0xe7, 0x0b, 0x5e, 0x70, 0xac, 0x2d, 0x43, 0xfa, 0x03,
-	0xfa, 0x1b, 0x21, 0x72, 0x09, 0x64, 0x91, 0xff, 0x5e, 0xa1, 0x92, 0xb3, 0xcf, 0x42, 0x6b, 0x1e,
-	0x09, 0x3d, 0x74, 0xc6, 0x1d, 0xaf, 0x1f, 0xbc, 0x68, 0x7a, 0xaa, 0x06, 0xb2, 0x06, 0x31, 0xfd,
-	0xed, 0x00, 0xb9, 0x8d, 0xe6, 0xc3, 0x33, 0x79, 0xe0, 0x9c, 0x27, 0xe5, 0x4c, 0xaa, 0x00, 0x99,
-	0xc2, 0x23, 0xc5, 0x53, 0x23, 0xf3, 0x41, 0xaf, 0x6d, 0xb4, 0xad, 0x8d, 0x57, 0x4d, 0x36, 0x2e,
-	0xb6, 0x61, 0x76, 0x5b, 0x4f, 0x11, 0x0e, 0x9b, 0xe1, 0xdc, 0xcc, 0x1a, 0xb7, 0x66, 0x1e, 0xb0,
-	0x2a, 0x40, 0xde, 0x41, 0x2f, 0xa9, 0x7b, 0x78, 0xd2, 0xe4, 0x61, 0xf5, 0x1a, 0x5b, 0xc3, 0x94,
-	0xc2, 0xfe, 0x66, 0x66, 0xbd, 0x64, 0x4e, 0xb5, 0x64, 0xc1, 0xdf, 0x0e, 0x1c, 0xd8, 0x3d, 0x29,
-	0x1f, 0x23, 0x01, 0xb8, 0x17, 0x18, 0xc7, 0x64, 0xb0, 0x55, 0x24, 0xdf, 0xf1, 0xd1, 0xa0, 0x61,
-	0x95, 0x69, 0xcb, 0x6a, 0xe4, 0x32, 0xba, 0x9b, 0xc6, 0x1e, 0x4b, 0x8b, 0xbc, 0x87, 0xee, 0x29,
-	0x97, 0xb1, 0x08, 0xc9, 0xee, 0xfb, 0xd8, 0xa5, 0x3d, 0x81, 0xde, 0x07, 0x4c, 0x54, 0x2c, 0x8c,
-	0xf8, 0x9f, 0xba, 0x29, 0x55, 0x6c, 0x5a, 0xe1, 0xf9, 0x32, 0x93, 0xe6, 0x5e, 0x9e, 0x03, 0x70,
-	0xa7, 0x06, 0xd5, 0xbd, 0x34, 0xc7, 0xd0, 0x39, 0xe3, 0x3b, 0x46, 0xb3, 0x7d, 0x1e, 0x1b, 0xb7,
-	0x48, 0x5b, 0x27, 0x47, 0xdf, 0x3c, 0x23, 0x43, 0xa1, 0x10, 0x63, 0x1f, 0xd3, 0x68, 0x52, 0x63,
-	0xeb, 0x7f, 0xd7, 0x5d, 0x7b, 0x9f, 0x6f, 0xfe, 0x05, 0x00, 0x00, 0xff, 0xff, 0x46, 0xac, 0x56,
-	0x96, 0xd2, 0x04, 0x00, 0x00,
+	// 509 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x93, 0xc1, 0x6e, 0xd3, 0x40,
+	0x10, 0x86, 0xeb, 0xc4, 0x84, 0x74, 0xd2, 0x1e, 0x98, 0x4a, 0x91, 0x49, 0x11, 0x84, 0x15, 0x48,
+	0x56, 0x0f, 0x8e, 0x08, 0xaa, 0x88, 0x84, 0xb8, 0x14, 0xe8, 0x85, 0x02, 0xe9, 0xa6, 0x12, 0x12,
+	0x17, 0xd8, 0xc6, 0x1b, 0xb3, 0x8a, 0x9d, 0x5d, 0xd9, 0x6b, 0xa1, 0x3c, 0x01, 0x07, 0x5e, 0x87,
+	0x07, 0x44, 0x6b, 0xc7, 0x71, 0x9c, 0x38, 0x3d, 0xf4, 0xe6, 0xfd, 0xe7, 0x9b, 0x99, 0x7f, 0xc7,
+	0xb3, 0x70, 0xf2, 0x5b, 0xc6, 0xf3, 0x64, 0xfa, 0x8b, 0xfb, 0x69, 0xc8, 0x63, 0x4f, 0xc5, 0x52,
+	0x4b, 0x3c, 0xae, 0x88, 0xbd, 0x67, 0x81, 0x94, 0x41, 0xc8, 0x07, 0x59, 0xf0, 0x36, 0x9d, 0x0d,
+	0xb4, 0x88, 0x78, 0xa2, 0x59, 0xa4, 0x72, 0xbe, 0x77, 0xba, 0x0d, 0xf0, 0x48, 0xe9, 0x65, 0x1e,
+	0x24, 0x7f, 0x2d, 0xb0, 0xbf, 0xc9, 0x78, 0x8e, 0xaf, 0xa0, 0x95, 0xc8, 0x34, 0x9e, 0x72, 0xc7,
+	0xea, 0x5b, 0x6e, 0x67, 0xf8, 0xd8, 0xab, 0xf6, 0x36, 0xd0, 0x24, 0x03, 0xe8, 0x0a, 0x44, 0x04,
+	0xdb, 0x67, 0x9a, 0x39, 0x8d, 0xbe, 0xe5, 0x1e, 0xd1, 0xec, 0x1b, 0x9f, 0x02, 0xf8, 0x22, 0xe6,
+	0x53, 0x2d, 0xe4, 0x22, 0x71, 0x9a, 0x59, 0x64, 0x43, 0xc1, 0x27, 0x70, 0x18, 0x73, 0xa6, 0xb5,
+	0xf1, 0xe0, 0xd8, 0x7d, 0xcb, 0x6d, 0xd3, 0x52, 0x20, 0x2f, 0x00, 0xca, 0x3e, 0xd8, 0xad, 0x58,
+	0x3a, 0x2c, 0xfa, 0x92, 0x0f, 0xd0, 0xb9, 0x62, 0x01, 0xe5, 0x89, 0x92, 0x8b, 0x84, 0xe3, 0x39,
+	0xb4, 0xa3, 0xe5, 0x8f, 0x99, 0xe0, 0xa1, 0xbf, 0xf2, 0xde, 0xf3, 0xf2, 0x2b, 0x7b, 0xc5, 0x95,
+	0xbd, 0x9b, 0x62, 0x26, 0xf4, 0x61, 0xb4, 0xbc, 0x34, 0x28, 0x19, 0xe5, 0xbd, 0xbe, 0xa6, 0x5a,
+	0xa5, 0x1a, 0xcf, 0xa0, 0x21, 0xca, 0xf4, 0xea, 0xd5, 0x3f, 0xb1, 0xd9, 0x9c, 0xe5, 0x1c, 0x6d,
+	0x08, 0x9f, 0xfc, 0x84, 0xce, 0x86, 0x84, 0xd7, 0x80, 0x73, 0x73, 0xbc, 0x91, 0x4a, 0x4c, 0x3f,
+	0xf3, 0x24, 0x61, 0x01, 0x4f, 0x1c, 0xab, 0xdf, 0x74, 0x3b, 0xc3, 0xe7, 0x75, 0xa5, 0x2a, 0x20,
+	0xad, 0x49, 0x26, 0x7f, 0x2c, 0xc0, 0x5d, 0xd4, 0x0c, 0x4f, 0x1b, 0xe1, 0x0b, 0x8b, 0x8a, 0x99,
+	0x94, 0x02, 0x4e, 0xe0, 0x91, 0x62, 0xb1, 0x16, 0x66, 0xd0, 0x6b, 0x1b, 0x8d, 0xcc, 0xc6, 0xcb,
+	0x3a, 0x1b, 0xe3, 0x6d, 0x98, 0xee, 0xe6, 0x13, 0x09, 0xdd, 0x7a, 0xd8, 0x98, 0x59, 0xe3, 0x99,
+	0x99, 0x07, 0xb4, 0x14, 0xf0, 0x0d, 0xb4, 0xa3, 0xaa, 0x87, 0xd3, 0x3a, 0x0f, 0xab, 0x6a, 0x74,
+	0x0d, 0x13, 0x02, 0x47, 0x9b, 0x91, 0xf5, 0x92, 0x59, 0xe5, 0x92, 0x0d, 0xff, 0x35, 0xe1, 0x38,
+	0xdb, 0x93, 0xa2, 0x18, 0x9e, 0x83, 0x3d, 0x96, 0x61, 0x88, 0xdd, 0x9d, 0x3f, 0xff, 0xd1, 0x2c,
+	0x7b, 0xef, 0xa4, 0x66, 0x9b, 0xc9, 0x01, 0x8e, 0xc0, 0x1e, 0x8b, 0x45, 0xb0, 0x37, 0x6d, 0x8f,
+	0x4e, 0x0e, 0xf0, 0x1d, 0xb4, 0x2e, 0x99, 0x08, 0xb9, 0x8f, 0xfb, 0x1f, 0xca, 0x1d, 0xe9, 0x17,
+	0xd0, 0x7e, 0x2f, 0x23, 0x15, 0x72, 0xcd, 0xef, 0x2a, 0x50, 0x17, 0xca, 0xb7, 0x2e, 0x37, 0x7f,
+	0x9d, 0x0a, 0x7d, 0x0f, 0xf3, 0x23, 0xb0, 0x27, 0x5a, 0xaa, 0x7b, 0x64, 0xbe, 0x85, 0xe6, 0x15,
+	0xdb, 0x3f, 0xaf, 0xed, 0x97, 0xb3, 0xf1, 0x4c, 0xc9, 0xc1, 0xc5, 0xd9, 0x77, 0x57, 0x0b, 0x9f,
+	0x2b, 0x29, 0x43, 0x4f, 0xc6, 0xc1, 0xa0, 0xc2, 0x56, 0x4f, 0xb7, 0xad, 0xac, 0xf2, 0xeb, 0xff,
+	0x01, 0x00, 0x00, 0xff, 0xff, 0x38, 0xb4, 0x6f, 0x3b, 0x02, 0x05, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -481,18 +450,18 @@ const _ = grpc.SupportPackageIsVersion6
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type WorkSchedulerClient interface {
 	// Retrieve work to be performed
-	Poll(ctx context.Context, in *None, opts ...grpc.CallOption) (*Work, error)
+	Poll(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Work, error)
 	// confirm that work scheduler is alive
-	Ping(ctx context.Context, in *None, opts ...grpc.CallOption) (*None, error)
+	Ping(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error)
 	// report to work scheduler that a work item failed
-	Failed(ctx context.Context, in *WorkSource, opts ...grpc.CallOption) (*None, error)
+	Failed(ctx context.Context, in *WorkSource, opts ...grpc.CallOption) (*empty.Empty, error)
 	// report to work scheduler that a work item is completed
 	Complete(ctx context.Context, in *WorkSource, opts ...grpc.CallOption) (*WorkOutput, error)
 	// cause work scheduler to exit
-	Quit(ctx context.Context, in *None, opts ...grpc.CallOption) (*None, error)
+	Quit(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error)
 	// cause work scheduler to stop providing work
-	Stop(ctx context.Context, in *None, opts ...grpc.CallOption) (*None, error)
-	Lag(ctx context.Context, in *None, opts ...grpc.CallOption) (*LagResponse, error)
+	Stop(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error)
+	Lag(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*LagResponse, error)
 }
 
 type workSchedulerClient struct {
@@ -503,7 +472,7 @@ func NewWorkSchedulerClient(cc grpc.ClientConnInterface) WorkSchedulerClient {
 	return &workSchedulerClient{cc}
 }
 
-func (c *workSchedulerClient) Poll(ctx context.Context, in *None, opts ...grpc.CallOption) (*Work, error) {
+func (c *workSchedulerClient) Poll(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Work, error) {
 	out := new(Work)
 	err := c.cc.Invoke(ctx, "/workscheduler.WorkScheduler/Poll", in, out, opts...)
 	if err != nil {
@@ -512,8 +481,8 @@ func (c *workSchedulerClient) Poll(ctx context.Context, in *None, opts ...grpc.C
 	return out, nil
 }
 
-func (c *workSchedulerClient) Ping(ctx context.Context, in *None, opts ...grpc.CallOption) (*None, error) {
-	out := new(None)
+func (c *workSchedulerClient) Ping(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/workscheduler.WorkScheduler/Ping", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -521,8 +490,8 @@ func (c *workSchedulerClient) Ping(ctx context.Context, in *None, opts ...grpc.C
 	return out, nil
 }
 
-func (c *workSchedulerClient) Failed(ctx context.Context, in *WorkSource, opts ...grpc.CallOption) (*None, error) {
-	out := new(None)
+func (c *workSchedulerClient) Failed(ctx context.Context, in *WorkSource, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/workscheduler.WorkScheduler/Failed", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -539,8 +508,8 @@ func (c *workSchedulerClient) Complete(ctx context.Context, in *WorkSource, opts
 	return out, nil
 }
 
-func (c *workSchedulerClient) Quit(ctx context.Context, in *None, opts ...grpc.CallOption) (*None, error) {
-	out := new(None)
+func (c *workSchedulerClient) Quit(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/workscheduler.WorkScheduler/Quit", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -548,8 +517,8 @@ func (c *workSchedulerClient) Quit(ctx context.Context, in *None, opts ...grpc.C
 	return out, nil
 }
 
-func (c *workSchedulerClient) Stop(ctx context.Context, in *None, opts ...grpc.CallOption) (*None, error) {
-	out := new(None)
+func (c *workSchedulerClient) Stop(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/workscheduler.WorkScheduler/Stop", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -557,7 +526,7 @@ func (c *workSchedulerClient) Stop(ctx context.Context, in *None, opts ...grpc.C
 	return out, nil
 }
 
-func (c *workSchedulerClient) Lag(ctx context.Context, in *None, opts ...grpc.CallOption) (*LagResponse, error) {
+func (c *workSchedulerClient) Lag(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*LagResponse, error) {
 	out := new(LagResponse)
 	err := c.cc.Invoke(ctx, "/workscheduler.WorkScheduler/Lag", in, out, opts...)
 	if err != nil {
@@ -569,43 +538,43 @@ func (c *workSchedulerClient) Lag(ctx context.Context, in *None, opts ...grpc.Ca
 // WorkSchedulerServer is the server API for WorkScheduler service.
 type WorkSchedulerServer interface {
 	// Retrieve work to be performed
-	Poll(context.Context, *None) (*Work, error)
+	Poll(context.Context, *empty.Empty) (*Work, error)
 	// confirm that work scheduler is alive
-	Ping(context.Context, *None) (*None, error)
+	Ping(context.Context, *empty.Empty) (*empty.Empty, error)
 	// report to work scheduler that a work item failed
-	Failed(context.Context, *WorkSource) (*None, error)
+	Failed(context.Context, *WorkSource) (*empty.Empty, error)
 	// report to work scheduler that a work item is completed
 	Complete(context.Context, *WorkSource) (*WorkOutput, error)
 	// cause work scheduler to exit
-	Quit(context.Context, *None) (*None, error)
+	Quit(context.Context, *empty.Empty) (*empty.Empty, error)
 	// cause work scheduler to stop providing work
-	Stop(context.Context, *None) (*None, error)
-	Lag(context.Context, *None) (*LagResponse, error)
+	Stop(context.Context, *empty.Empty) (*empty.Empty, error)
+	Lag(context.Context, *empty.Empty) (*LagResponse, error)
 }
 
 // UnimplementedWorkSchedulerServer can be embedded to have forward compatible implementations.
 type UnimplementedWorkSchedulerServer struct {
 }
 
-func (*UnimplementedWorkSchedulerServer) Poll(ctx context.Context, req *None) (*Work, error) {
+func (*UnimplementedWorkSchedulerServer) Poll(ctx context.Context, req *empty.Empty) (*Work, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Poll not implemented")
 }
-func (*UnimplementedWorkSchedulerServer) Ping(ctx context.Context, req *None) (*None, error) {
+func (*UnimplementedWorkSchedulerServer) Ping(ctx context.Context, req *empty.Empty) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
-func (*UnimplementedWorkSchedulerServer) Failed(ctx context.Context, req *WorkSource) (*None, error) {
+func (*UnimplementedWorkSchedulerServer) Failed(ctx context.Context, req *WorkSource) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Failed not implemented")
 }
 func (*UnimplementedWorkSchedulerServer) Complete(ctx context.Context, req *WorkSource) (*WorkOutput, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Complete not implemented")
 }
-func (*UnimplementedWorkSchedulerServer) Quit(ctx context.Context, req *None) (*None, error) {
+func (*UnimplementedWorkSchedulerServer) Quit(ctx context.Context, req *empty.Empty) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Quit not implemented")
 }
-func (*UnimplementedWorkSchedulerServer) Stop(ctx context.Context, req *None) (*None, error) {
+func (*UnimplementedWorkSchedulerServer) Stop(ctx context.Context, req *empty.Empty) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Stop not implemented")
 }
-func (*UnimplementedWorkSchedulerServer) Lag(ctx context.Context, req *None) (*LagResponse, error) {
+func (*UnimplementedWorkSchedulerServer) Lag(ctx context.Context, req *empty.Empty) (*LagResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Lag not implemented")
 }
 
@@ -614,7 +583,7 @@ func RegisterWorkSchedulerServer(s *grpc.Server, srv WorkSchedulerServer) {
 }
 
 func _WorkScheduler_Poll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(None)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -626,13 +595,13 @@ func _WorkScheduler_Poll_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: "/workscheduler.WorkScheduler/Poll",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkSchedulerServer).Poll(ctx, req.(*None))
+		return srv.(WorkSchedulerServer).Poll(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _WorkScheduler_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(None)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -644,7 +613,7 @@ func _WorkScheduler_Ping_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: "/workscheduler.WorkScheduler/Ping",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkSchedulerServer).Ping(ctx, req.(*None))
+		return srv.(WorkSchedulerServer).Ping(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -686,7 +655,7 @@ func _WorkScheduler_Complete_Handler(srv interface{}, ctx context.Context, dec f
 }
 
 func _WorkScheduler_Quit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(None)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -698,13 +667,13 @@ func _WorkScheduler_Quit_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: "/workscheduler.WorkScheduler/Quit",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkSchedulerServer).Quit(ctx, req.(*None))
+		return srv.(WorkSchedulerServer).Quit(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _WorkScheduler_Stop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(None)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -716,13 +685,13 @@ func _WorkScheduler_Stop_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: "/workscheduler.WorkScheduler/Stop",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkSchedulerServer).Stop(ctx, req.(*None))
+		return srv.(WorkSchedulerServer).Stop(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _WorkScheduler_Lag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(None)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -734,7 +703,7 @@ func _WorkScheduler_Lag_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/workscheduler.WorkScheduler/Lag",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkSchedulerServer).Lag(ctx, req.(*None))
+		return srv.(WorkSchedulerServer).Lag(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
