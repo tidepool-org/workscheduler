@@ -4,38 +4,40 @@ package workscheduler;
 
 import "google/protobuf/timestamp.proto";
 
+option go_package = "tidepool.org/workscheduler/workscheduler";
+
 // Interface exported by the work server
 service WorkScheduler {
 
   // Retrieve work to be performed
-  rpc poll() returns (Work) {}
+  rpc Poll(None) returns (Work) {}
 
   // confirm that work scheduler is alive
-  rpc ping() returns (Pong) {}
+  rpc Ping(None) returns (None) {}
 
   // report to work scheduler that a work item failed
-  rpc failed(WorkSource) returns () {}
+  rpc Failed(WorkSource) returns (None) {}
 
   // report to work scheduler that a work item is completed
-  rpc complete(WorkSource) returns (WorkOutput) {}
+  rpc Complete(WorkSource) returns (WorkOutput) {}
 
   // cause work scheduler to exit
-  rpc quit() return () {}
+  rpc Quit(None) returns (None) {}
 
   // cause work scheduler to stop providing work
-  rpc stop() returns () {}
+  rpc Stop(None) returns (None) {}
 
-  rpc lag() return (Lag) {}
+  rpc Lag(None) returns (LagResponse) {}
 }
 
-message Pong {
+message None {
 }
 
 // Work - a description of the work item to process
 message Work {
  
   // describes the source of the work.
-  WorkSource data = 1;
+  WorkSource source = 1;
 
    // describes the work to perform. 
   bytes data = 2;     
@@ -44,7 +46,7 @@ message Work {
   bytes directions = 3; 
 
   // describes if the work *may* have been attempted before
-  boolean reattempt = 4;
+  bool reattempt = 4;
 }
 
 message WorkSource {
@@ -52,8 +54,8 @@ message WorkSource {
   string source = 1;
 }
 
-// Lag - how much the work scheduler is lagging
-message Lag {
+// LagResponse - how much the work scheduler is lagging
+message LagResponse {
   // the timestamp of the oldest message not yet processed
   google.protobuf.Timestamp my_field = 1;
 }
