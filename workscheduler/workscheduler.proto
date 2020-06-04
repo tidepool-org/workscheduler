@@ -67,7 +67,7 @@ message KafkaOutput {
 }
 
 message KafkaTopicMessages {
-  string topicName = 1;
+  string topic = 1;
   repeated KafkaPartitionMessages partitionMessages = 2;
 }
 
