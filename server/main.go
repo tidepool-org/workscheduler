@@ -5,6 +5,7 @@ import (
 	"context"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"sync"
@@ -13,6 +14,8 @@ import (
 	empty "github.com/golang/protobuf/ptypes/empty"
 	pb "github.com/tidepool-org/workscheduler/workscheduler"
 	"google.golang.org/grpc"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // Config is the configuration of the work scheduler
@@ -125,6 +128,8 @@ func main() {
 	}
 
 	workSchedulerServer := NewWorkSchedulerServer(config)
+
+	promServer := 
 
 	// listen to signals to stop server
 	// convert to cancel on context that server listens to
