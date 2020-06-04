@@ -5,7 +5,7 @@ package workscheduler;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
-option go_package = "tidepool.org/workscheduler/workscheduler";
+option go_package = "github.com/tidepool-org/workscheduler/workscheduler";
 
 // Interface exported by the work server
 service WorkScheduler {
