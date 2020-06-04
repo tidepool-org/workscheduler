@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"os"
 	"time"
 
 	"google.golang.org/grpc"
@@ -26,7 +25,7 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	r, err := c.Ping(ctx, &empty.Emptuy{})
+	_, err = c.Ping(ctx, &empty.Empty{})
 	if err != nil {
 		log.Fatalf("could not ping: %v", err)
 	}

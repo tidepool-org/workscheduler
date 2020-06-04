@@ -44,7 +44,7 @@ func (s *server) Stop(ctx context.Context, in *empty.Empty) (*empty.Empty, error
 	return &empty.Empty{}, nil
 }
 
-func (s *server) Stop(ctx context.Context, in *empty.Empty) (*pb.LagResponse, error) {
+func (s *server) Lag(ctx context.Context, in *empty.Empty) (*pb.LagResponse, error) {
 	return &pb.LagResponse{}, nil
 }
 
