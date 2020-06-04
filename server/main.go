@@ -25,7 +25,19 @@ type Config struct {
 // WorkSchedulerServer is used to implement workscheduler
 type WorkSchedulerServer struct {
 	pb.UnimplementedWorkSchedulerServer
-	Config Config
+	Config     Config
+	grpcServer *grpc.Server
+}
+
+// NewWorkSchedulerServer create a new WorkSchedulerServer
+func NewWorkSchedulerServer(c Config) *WorkSchedulerServer {
+	grpcServer := grpc.NewServer()
+	pb.RegisterWorkSchedulerServer(grpcServer, &WorkSchedulerServer{})
+
+	return &WorkSchedulerServer{
+		Config:     c,
+		grpcServer: grpcServer,
+	}
 }
 
 // Poll for work to process
@@ -55,6 +67,8 @@ func (s *WorkSchedulerServer) Quit(ctx context.Context, in *empty.Empty) (*empty
 
 // Stop the server from distributing new work
 func (s *WorkSchedulerServer) Stop(ctx context.Context, in *empty.Empty) (*empty.Empty, error) {
+	// stop the grpcServer
+	s.grpcServer.Stop()
 	return &empty.Empty{}, nil
 }
 
@@ -66,14 +80,27 @@ func (s *WorkSchedulerServer) Lag(ctx context.Context, in *empty.Empty) (*pb.Lag
 // Run the server
 func (s *WorkSchedulerServer) Run(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
+	s.running(ctx)
+}
+
+func (s *WorkSchedulerServer) running(ctx context.Context) {
+	// send Stop on graceful shutdown
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				s.Stop(ctx, nil)
+			}
+		}
+	}()
+
 	lis, err := net.Listen("tcp", s.Config.port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	grpcServer := grpc.NewServer()
-	pb.RegisterWorkSchedulerServer(grpcServer, &WorkSchedulerServer{})
 
-	if err := grpcServer.Serve(lis); err != nil {
+	// this blocks until he grpc server exits via a call to s.grpcServer.Stop()
+	if err := s.grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }
@@ -97,22 +124,22 @@ func main() {
 		panic("kafka port not provided")
 	}
 
-	server := WorkSchedulerServer{Config: config}
+	workSchedulerServer := NewWorkSchedulerServer(config)
 
+	// listen to signals to stop server
+	// convert to cancel on context that server listens to
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
-
 	ctx, cancelFunc := context.WithCancel(context.Background())
-
-	var wg sync.WaitGroup
-	wg.Add(1)
-	server.Run(ctx, &wg)
-
 	go func(stop chan os.Signal, cancelFunc context.CancelFunc) {
 		<-stop
 		log.Print("sigint or sigterm received!!!")
 		cancelFunc()
 	}(stop, cancelFunc)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	workSchedulerServer.Run(ctx, &wg)
 
 	wg.Wait()
 }
