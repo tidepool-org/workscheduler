@@ -1,7 +1,8 @@
-package workscheduler
+package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -18,7 +19,7 @@ func NewPromServer(port string) *PromServer {
 	http.Handle("/metrics", promhttp.Handler())
 	return &PromServer{
 		srv: &http.Server{
-			Addr: port,
+			Addr: fmt.Sprintf(":%v", port),
 		},
 	}
 }
@@ -30,6 +31,7 @@ func (p *PromServer) Run(ctx context.Context, wg *sync.WaitGroup) {
 
 func (p *PromServer) running(ctx context.Context) {
 	go func() {
+		log.Printf("starting prometheus server on :%v", p.srv.Addr)
 		if err := p.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen:%+s\n", err)
 		}
@@ -47,5 +49,5 @@ func (p *PromServer) running(ctx context.Context) {
 		log.Fatalf("server Shutdown Failed:%+s", err)
 	}
 
-	log.Printf("server exited properly")
+	log.Printf("prometheus server exited properly")
 }
