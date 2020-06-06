@@ -1,4 +1,3 @@
-// Package main implements a server for Greeter service.
 package main
 
 import (
@@ -10,22 +9,31 @@ import (
 	"syscall"
 	)
 
-
 func main() {
 	var config Config
 	var found bool
 
-	config.brokers, found = os.LookupEnv("KAFKA_BROKERS")
+	config.Brokers, found = os.LookupEnv("KAFKA_BROKERS")
 	if !found {
 		panic("kafka brokers not provided")
 	}
 
-	config.prefix, found = os.LookupEnv("KAFKA_TOPIC_PREFIX")
+	config.Prefix, found = os.LookupEnv("KAFKA_TOPIC_PREFIX")
 	if !found {
 		panic("kafka prefix not provided")
 	}
 
-	config.port, found = os.LookupEnv("WORK_SCHEDULER_PORT")
+	config.Topic, found = os.LookupEnv("KAFKA_TOPIC")
+	if !found {
+		panic("kafka topic not provided")
+	}
+
+	config.Group, found = os.LookupEnv("KAFKA_CONSUMER_GROUP")
+	if !found {
+		panic("kafka consumer group not provided")
+	}
+
+	config.Port, found = os.LookupEnv("WORK_SCHEDULER_PORT")
 	if !found {
 		panic("kafka port not provided")
 	}
