@@ -2,16 +2,15 @@ package main
 
 import (
 	"context"
+	"github.com/golang/protobuf/ptypes/empty"
+	pb "github.com/tidepool-org/workscheduler/workscheduler"
+	"google.golang.org/grpc"
 	"log"
 	"time"
-
-	"google.golang.org/grpc"
-	empty "github.com/golang/protobuf/ptypes/empty"
-	pb "github.com/tidepool-org/workscheduler/workscheduler"
 )
 
 const (
-	address     = "localhost:50051"
+	address     = "localhost:5051"
 )
 
 func main() {
@@ -23,10 +22,36 @@ func main() {
 	defer conn.Close()
 	c := pb.NewWorkSchedulerClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	_, err = c.Ping(ctx, &empty.Empty{})
-	if err != nil {
-		log.Fatalf("could not ping: %v", err)
+	work := make([]*pb.Work, 0)
+	for i := 0; i < 5; i++ {
+		res, err := c.Poll(context.Background(), &empty.Empty{})
+		if err != nil {
+			log.Printf(err.Error())
+			continue
+		}
+		work = append(work, res)
+		log.Printf(string(res.Data))
+	}
+
+	log.Printf("%v", work)
+	// complete first 2 items in order, next 3 in reverse order
+	if _, err := c.Complete(context.Background(), work[0].Source); err != nil {
+		log.Printf(err.Error())
+	}
+	time.Sleep(time.Second)
+	if _, err := c.Complete(context.Background(), work[1].Source); err != nil {
+		log.Printf(err.Error())
+	}
+	time.Sleep(time.Second)
+	if _, err := c.Complete(context.Background(), work[4].Source); err != nil {
+		log.Printf(err.Error())
+	}
+	time.Sleep(time.Second)
+	if _, err := c.Complete(context.Background(), work[3].Source); err != nil {
+		log.Printf(err.Error())
+	}
+	time.Sleep(time.Second)
+	if _, err := c.Complete(context.Background(), work[2].Source); err != nil {
+		log.Printf(err.Error())
 	}
 }

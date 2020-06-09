@@ -18,19 +18,11 @@ func main() {
 		panic("kafka brokers not provided")
 	}
 
-	config.Prefix, found = os.LookupEnv("KAFKA_TOPIC_PREFIX")
-	if !found {
-		panic("kafka prefix not provided")
-	}
+	config.Prefix, _ = os.LookupEnv("KAFKA_TOPIC_PREFIX")
 
 	config.Topic, found = os.LookupEnv("KAFKA_TOPIC")
 	if !found {
 		panic("kafka topic not provided")
-	}
-
-	config.Group, found = os.LookupEnv("KAFKA_CONSUMER_GROUP")
-	if !found {
-		panic("kafka consumer group not provided")
 	}
 
 	config.Port, found = os.LookupEnv("WORK_SCHEDULER_PORT")
