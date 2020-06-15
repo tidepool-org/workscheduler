@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/tidepool-org/workscheduler/orchestrator"
@@ -10,29 +11,31 @@ import (
 	"log"
 	"net"
 	"sync"
+	"time"
 )
 
 // Config is the configuration of the work scheduler
 type Config struct {
-	Brokers string
-	Group   string
-	Prefix  string
-	Topic   string
-	Port    string
+	Brokers     string
+	Group       string
+	Prefix      string
+	Topic       string
+	Port        string
+	WorkTimeout time.Duration
 }
 
 // WorkSchedulerServer is used to implement workscheduler
 type WorkSchedulerServer struct {
 	pb.UnimplementedWorkSchedulerServer
-	Config     Config
-	grpcServer *grpc.Server
+	Config           Config
+	grpcServer       *grpc.Server
 	workOrchestrator orchestrator.Orchestrator
 }
 
 // NewWorkSchedulerServer create a new WorkSchedulerServer
 func NewWorkSchedulerServer(c Config) *WorkSchedulerServer {
 	grpcServer := grpc.NewServer()
-	wsServer :=   &WorkSchedulerServer{
+	wsServer := &WorkSchedulerServer{
 		Config:     c,
 		grpcServer: grpcServer,
 	}
@@ -43,8 +46,12 @@ func NewWorkSchedulerServer(c Config) *WorkSchedulerServer {
 
 // Poll for work to process
 func (s *WorkSchedulerServer) Poll(ctx context.Context, in *empty.Empty) (*pb.Work, error) {
-	work := <-s.workOrchestrator.WorkChannel()
-	return &work, nil
+	select {
+	case <-ctx.Done():
+		return nil, errors.New("timed out while polling for work")
+	case work := <-s.workOrchestrator.WorkChannel():
+		return &work, nil
+	}
 }
 
 // Ping to check for health of work scheduler server
@@ -121,7 +128,13 @@ func (s *WorkSchedulerServer) running(ctx context.Context, wg *sync.WaitGroup) {
 }
 
 func (s *WorkSchedulerServer) startOrchestrator(ctx context.Context, wg *sync.WaitGroup) error {
-	wo, err := orchestrator.NewKafkaWorkOrchestrator(s.Config.Brokers, s.Config.Prefix, s.Config.Topic)
+	params := orchestrator.KafkaWorkOrchestratorParams{
+		Brokers:     s.Config.Brokers,
+		Prefix:      s.Config.Prefix,
+		Topic:       s.Config.Topic,
+		WorkTimeout: s.Config.WorkTimeout,
+	}
+	wo, err := orchestrator.NewKafkaWorkOrchestrator(params)
 	if err != nil {
 		return err
 	}

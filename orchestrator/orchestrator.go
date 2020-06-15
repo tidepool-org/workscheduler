@@ -19,20 +19,31 @@ type Orchestrator interface {
 }
 
 type kafkaSinglePartitionWorkOrchestrator struct {
-	workDispatcher               *WorkDispatcher
-	workConsumer                 *SinglePartitionConsumer
-	inFlightMonitor              *InFlightMonitor
-	expirationMonitor            *ExpirationMonitor
-	responseChan                 chan workscheduler.WorkSource
+	workDispatcher    *WorkDispatcher
+	workConsumer      *SinglePartitionConsumer
+	inFlightMonitor   *InFlightMonitor
+	expirationMonitor *ExpirationMonitor
+	responseChan      chan workscheduler.WorkSource
 }
 
-func NewKafkaWorkOrchestrator(brokers string, prefix string, topic string) (Orchestrator, error) {
-	prefixedTopic := fmt.Sprintf("%s%s", prefix, topic)
-	workConsumer, err := NewSinglePartitionConsumer(brokers, prefixedTopic, "work_consumer")
+type KafkaWorkOrchestratorParams struct {
+	Brokers     string
+	Prefix      string
+	Topic       string
+	WorkTimeout time.Duration
+}
+
+func (k KafkaWorkOrchestratorParams) GetPrefixedTopic() string {
+	return fmt.Sprintf("%s%s", k.Prefix, k.Topic)
+}
+
+func NewKafkaWorkOrchestrator(params KafkaWorkOrchestratorParams) (Orchestrator, error) {
+	prefixedTopic := params.GetPrefixedTopic()
+	workConsumer, err := NewSinglePartitionConsumer(params.Brokers, prefixedTopic, "work_consumer")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to start work consumer")
 	}
-	startedOffsetConsumer, err := NewSinglePartitionConsumer(brokers, prefixedTopic, "_started_offset_tracker_new")
+	startedOffsetConsumer, err := NewSinglePartitionConsumer(params.Brokers, prefixedTopic, "_started_offset_tracker_new")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to start _started_offset_tracker")
 	}
@@ -47,11 +58,11 @@ func NewKafkaWorkOrchestrator(brokers string, prefix string, topic string) (Orch
 	}
 
 	return &kafkaSinglePartitionWorkOrchestrator{
-		workConsumer:                 workConsumer,
-		workDispatcher:               workDispatcher,
-		inFlightMonitor:              inFlightMonitor,
-		expirationMonitor:            NewExpirationMonitor(),
-		responseChan:                 make(chan workscheduler.WorkSource),
+		workConsumer:      workConsumer,
+		workDispatcher:    workDispatcher,
+		inFlightMonitor:   inFlightMonitor,
+		expirationMonitor: NewExpirationMonitor(params.WorkTimeout),
+		responseChan:      make(chan workscheduler.WorkSource),
 	}, nil
 }
 
@@ -81,7 +92,7 @@ func (k *kafkaSinglePartitionWorkOrchestrator) Run(ctx context.Context, wg *sync
 		case workSource := <-k.responseChan:
 			k.complete(workSource)
 		case <-ticker.C:
-			// TODO: move the ticker in the expiration monitor
+			// TODO: move the ticker to the expiration monitor
 			k.expire()
 		}
 	}

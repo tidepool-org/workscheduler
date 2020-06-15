@@ -6,28 +6,26 @@ import (
 	"time"
 )
 
-const (
-	DefaultExpirationDuration = 10 * time.Second
-)
-
 type expirationRecord struct {
-	offset kafka.TopicPartition
+	offset         kafka.TopicPartition
 	expirationTime time.Time
 }
 
 type ExpirationMonitor struct {
 	records []*expirationRecord // kafka message offsets ordered by expiration time
+	timeout time.Duration
 }
 
-func NewExpirationMonitor() *ExpirationMonitor {
+func NewExpirationMonitor(timeout time.Duration) *ExpirationMonitor {
 	return &ExpirationMonitor{
-		make([]*expirationRecord, 0),
+		records: make([]*expirationRecord, 0),
+		timeout: timeout,
 	}
 }
 
 func (e *ExpirationMonitor) Add(offset kafka.TopicPartition) {
 	now := time.Now()
-	expirationTime := now.Add(DefaultExpirationDuration)
+	expirationTime := now.Add(e.timeout)
 	e.records = append(e.records, &expirationRecord{
 		offset:         offset,
 		expirationTime: expirationTime,
@@ -38,7 +36,7 @@ func (e *ExpirationMonitor) Remove(offset kafka.TopicPartition) {
 	// TODO: this assumes offsets are always increasing, which is the case atm, but this might change.
 	// The array is actually ordered by the expiration time, but it happens to be ordered by offsets too,
 	// because the offsets are added for expiration monitoring in the order they are started, which is
-	// always the order they are store in the partition (i.e. with monotonically increasing offsets).
+	// always the order they are stored in the kafka partition (i.e. with monotonically increasing offsets).
 	i := sort.Search(len(e.records), func(i int) bool { return e.records[i].offset.Offset >= offset.Offset })
 	if i < len(e.records) && offsetsAreEqual(e.records[i].offset, offset) {
 		e.records = append(e.records[:i], e.records[i+1:]...)

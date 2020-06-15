@@ -41,13 +41,13 @@ func (w *WorkDispatcher) OffsetsCommittedChannel() <-chan kafka.TopicPartition {
 func (w *WorkDispatcher) Run(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	run := true
-	for run == true {
+eventLoop:
+	for {
 		select {
 		// We can receive a shutdown signal while we're waiting for kafka messages
 		case <-ctx.Done():
 			fmt.Printf("Work disaptcher context has been terminated.")
-			run = false
+			break eventLoop
 		case ev := <-w.consumer.Events():
 			switch event := ev.(type) {
 			case *kafka.Message:
@@ -59,13 +59,13 @@ func (w *WorkDispatcher) Run(ctx context.Context, wg *sync.WaitGroup) {
 				select {
 				// We can also receive a shutdown signal while we're blocked on the work channel
 				case <-ctx.Done():
-					run = false
+					break eventLoop
 				case w.workChan <- work:
 					w.workStartedChan <- event.TopicPartition
 				}
 			case *kafka.Error:
 				log.Printf("Received fatal error. Shutting down ...: %v", event.Error())
-				run = false
+				break eventLoop
 			}
 		}
 	}

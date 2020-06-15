@@ -7,11 +7,13 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
-	)
+	"time"
+)
 
 func main() {
 	var config Config
 	var found bool
+	var err error
 
 	config.Brokers, found = os.LookupEnv("KAFKA_BROKERS")
 	if !found {
@@ -19,10 +21,19 @@ func main() {
 	}
 
 	config.Prefix, _ = os.LookupEnv("KAFKA_TOPIC_PREFIX")
+	if !found {
+		panic("kafka topic prefix not provided")
+	}
 
 	config.Topic, found = os.LookupEnv("KAFKA_TOPIC")
 	if !found {
 		panic("kafka topic not provided")
+	}
+
+	workTimeout, _ := os.LookupEnv("WORK_TIMEOUT")
+	config.WorkTimeout, err = time.ParseDuration(workTimeout)
+	if err != nil {
+		panic("work timeout is not provided or is invalid")
 	}
 
 	config.Port, found = os.LookupEnv("WORK_SCHEDULER_PORT")

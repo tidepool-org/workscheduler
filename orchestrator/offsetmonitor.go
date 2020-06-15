@@ -7,7 +7,7 @@ import (
 
 type OffsetMonitor struct {
 	consumer *SinglePartitionConsumer
-	offsets *MinOrderedOffsets
+	offsets  *MinOrderedOffsets
 }
 
 // NewOffsetMonitor is used to monitor which topic-partition offsets
@@ -15,7 +15,7 @@ type OffsetMonitor struct {
 func NewOffsetMonitor(consumer *SinglePartitionConsumer) *OffsetMonitor {
 	return &OffsetMonitor{
 		consumer: consumer,
-		offsets: NewOrderedOffsets(),
+		offsets:  NewOrderedOffsets(),
 	}
 }
 
@@ -28,9 +28,9 @@ func (o *OffsetMonitor) AddOffsets(offsets []kafka.TopicPartition) {
 func (o *OffsetMonitor) CommitOffset(offset kafka.TopicPartition) error {
 	// we need to commit 'n+1'
 	next := kafka.TopicPartition{
-		Topic: offset.Topic,
+		Topic:     offset.Topic,
 		Partition: offset.Partition,
-		Offset: offset.Offset + 1,
+		Offset:    offset.Offset + 1,
 	}
 
 	_, err := o.consumer.CommitOffsets([]kafka.TopicPartition{next})
