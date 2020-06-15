@@ -2,67 +2,56 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/tidepool-org/workscheduler/consumer"
+	"github.com/tidepool-org/workscheduler/orchestrator"
 	pb "github.com/tidepool-org/workscheduler/workscheduler"
 	"google.golang.org/grpc"
 	"log"
 	"net"
 	"sync"
+	"time"
 )
 
 // Config is the configuration of the work scheduler
 type Config struct {
-	Brokers string
-	Group   string
-	Prefix  string
-	Topic   string
-	Port    string
+	Brokers     string
+	Group       string
+	Prefix      string
+	Topic       string
+	Port        string
+	WorkTimeout time.Duration
 }
 
 // WorkSchedulerServer is used to implement workscheduler
 type WorkSchedulerServer struct {
 	pb.UnimplementedWorkSchedulerServer
-	Config     Config
-	grpcServer *grpc.Server
-	consumer   consumer.Consumer
+	Config           Config
+	grpcServer       *grpc.Server
+	workOrchestrator orchestrator.Orchestrator
 }
 
 // NewWorkSchedulerServer create a new WorkSchedulerServer
 func NewWorkSchedulerServer(c Config) *WorkSchedulerServer {
 	grpcServer := grpc.NewServer()
-	pb.RegisterWorkSchedulerServer(grpcServer, &WorkSchedulerServer{})
-
-	return &WorkSchedulerServer{
+	wsServer := &WorkSchedulerServer{
 		Config:     c,
 		grpcServer: grpcServer,
 	}
+
+	pb.RegisterWorkSchedulerServer(grpcServer, wsServer)
+	return wsServer
 }
 
 // Poll for work to process
 func (s *WorkSchedulerServer) Poll(ctx context.Context, in *empty.Empty) (*pb.Work, error) {
-	// blocks until there's work or until the context is terminated
-	msg, err := s.consumer.Poll(ctx)
-	if err != nil {
-		return nil, err
+	select {
+	case <-ctx.Done():
+		return nil, errors.New("timed out while polling for work")
+	case work := <-s.workOrchestrator.WorkChannel():
+		return &work, nil
 	}
-
-	ws, err := json.Marshal(msg.TopicPartition)
-	if err != nil {
-		return nil, err
-	}
-
-	work := &pb.Work{
-		Source: &pb.WorkSource{
-			Source: string(ws),
-		},
-		Data:       msg.Value,
-	}
-
-	return work, nil
 }
 
 // Ping to check for health of work scheduler server
@@ -82,14 +71,8 @@ func (s *WorkSchedulerServer) Complete(ctx context.Context, in *pb.WorkSource) (
 }
 
 func (s *WorkSchedulerServer) acknowledgeWork(ctx context.Context, in *pb.WorkSource) (*empty.Empty, error) {
-	tp := kafka.TopicPartition{}
-	if err := json.Unmarshal([]byte(in.Source), &tp); err != nil {
-		return &empty.Empty{}, err
-	}
-
-	err := s.consumer.StoreOffset(ctx, tp)
-
-	return &empty.Empty{}, err
+	s.workOrchestrator.ResponseChannel() <- *in
+	return &empty.Empty{}, nil
 }
 
 // Quit shuts down the server
@@ -112,10 +95,10 @@ func (s *WorkSchedulerServer) Lag(ctx context.Context, in *empty.Empty) (*pb.Lag
 // Run the server
 func (s *WorkSchedulerServer) Run(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
-	s.running(ctx)
+	s.running(ctx, wg)
 }
 
-func (s *WorkSchedulerServer) running(ctx context.Context) {
+func (s *WorkSchedulerServer) running(ctx context.Context, wg *sync.WaitGroup) {
 	// send Stop on graceful shutdown
 	go func() {
 		for {
@@ -126,11 +109,11 @@ func (s *WorkSchedulerServer) running(ctx context.Context) {
 		}
 	}()
 
-	if err := s.initKafkaConsumer(ctx); err != nil {
-		log.Fatalf("failed to initialize kafka consumer: %v", err)
+	if err := s.startOrchestrator(ctx, wg); err != nil {
+		log.Fatalf("Failed to start kafka orchestrator: %v", err)
 	}
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", s.Config.Port))
+	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%v", s.Config.Port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -144,22 +127,20 @@ func (s *WorkSchedulerServer) running(ctx context.Context) {
 	log.Printf("grpc server exited properly")
 }
 
-func (s *WorkSchedulerServer) initKafkaConsumer(ctx context.Context) error {
-	prefixedTopic := fmt.Sprintf("%s_%s", s.Config.Prefix, s.Config.Topic)
-	prefixedGroup := fmt.Sprintf("%s_%s", s.Config.Prefix, s.Config.Group)
-	kafkaConsumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": s.Config.Brokers,
-		"group": prefixedGroup,
-	})
+func (s *WorkSchedulerServer) startOrchestrator(ctx context.Context, wg *sync.WaitGroup) error {
+	params := orchestrator.KafkaWorkOrchestratorParams{
+		Brokers:     s.Config.Brokers,
+		Prefix:      s.Config.Prefix,
+		Topic:       s.Config.Topic,
+		WorkTimeout: s.Config.WorkTimeout,
+	}
+	wo, err := orchestrator.NewKafkaWorkOrchestrator(params)
 	if err != nil {
 		return err
 	}
 
-	err = kafkaConsumer.Subscribe(prefixedTopic, nil)
-	if err != nil {
-		return err
-	}
-
-	s.consumer, err = consumer.New(kafkaConsumer)
-	return err
+	s.workOrchestrator = wo
+	wg.Add(1)
+	go s.workOrchestrator.Run(ctx, wg)
+	return nil
 }
