@@ -13,29 +13,17 @@ import (
 type WorkDispatcher struct {
 	consumer             *SinglePartitionConsumer
 	workChan             chan workscheduler.Work
-	workStartedChan      chan kafka.TopicPartition
-	offsetsCommittedChan chan kafka.TopicPartition
 }
 
 func NewWorkDispatcher(consumer *SinglePartitionConsumer) (*WorkDispatcher, error) {
 	return &WorkDispatcher{
 		consumer:             consumer,
 		workChan:             make(chan workscheduler.Work),
-		workStartedChan:      make(chan kafka.TopicPartition),
-		offsetsCommittedChan: make(chan kafka.TopicPartition),
 	}, nil
 }
 
 func (w *WorkDispatcher) WorkChannel() <-chan workscheduler.Work {
 	return w.workChan
-}
-
-func (w *WorkDispatcher) WorkStartedChannel() <-chan kafka.TopicPartition {
-	return w.workStartedChan
-}
-
-func (w *WorkDispatcher) OffsetsCommittedChannel() <-chan kafka.TopicPartition {
-	return w.offsetsCommittedChan
 }
 
 func (w *WorkDispatcher) Run(ctx context.Context, wg *sync.WaitGroup) {
@@ -61,7 +49,7 @@ eventLoop:
 				case <-ctx.Done():
 					break eventLoop
 				case w.workChan <- work:
-					w.workStartedChan <- event.TopicPartition
+					// Do nothing
 				}
 			case *kafka.Error:
 				log.Printf("Received fatal error. Shutting down ...: %v", event.Error())
@@ -90,6 +78,4 @@ func (w *WorkDispatcher) msgToWork(msg *kafka.Message) (work workscheduler.Work,
 
 func (w *WorkDispatcher) shutdown() {
 	close(w.workChan)
-	close(w.workStartedChan)
-	close(w.offsetsCommittedChan)
 }
