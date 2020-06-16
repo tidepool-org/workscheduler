@@ -13,8 +13,9 @@ import (
 )
 
 type Orchestrator interface {
-	WorkChannel() <-chan workscheduler.Work           // channel to read work requests from a work provider
-	ResponseChannel() chan<- workscheduler.WorkSource // channel to write work responses to a work provider
+	WorkChannel() <-chan workscheduler.Work              // channel to read work requests from a work provider
+	WorkStartedChannel() chan<- workscheduler.WorkSource // channel to write when work is started
+	ResponseChannel() chan<- workscheduler.WorkSource    // channel to write work responses to a work provider
 	Run(context.Context, *sync.WaitGroup)
 }
 
@@ -24,6 +25,7 @@ type kafkaSinglePartitionWorkOrchestrator struct {
 	inFlightMonitor   *InFlightMonitor
 	expirationMonitor *ExpirationMonitor
 	responseChan      chan workscheduler.WorkSource
+	workStartedChan   chan workscheduler.WorkSource
 }
 
 type KafkaWorkOrchestratorParams struct {
@@ -63,11 +65,16 @@ func NewKafkaWorkOrchestrator(params KafkaWorkOrchestratorParams) (Orchestrator,
 		inFlightMonitor:   inFlightMonitor,
 		expirationMonitor: NewExpirationMonitor(params.WorkTimeout),
 		responseChan:      make(chan workscheduler.WorkSource),
+		workStartedChan:   make(chan workscheduler.WorkSource),
 	}, nil
 }
 
 func (k *kafkaSinglePartitionWorkOrchestrator) WorkChannel() <-chan workscheduler.Work {
 	return k.workDispatcher.WorkChannel()
+}
+
+func (k *kafkaSinglePartitionWorkOrchestrator) WorkStartedChannel() chan<- workscheduler.WorkSource {
+	return k.workStartedChan
 }
 
 func (k *kafkaSinglePartitionWorkOrchestrator) ResponseChannel() chan<- workscheduler.WorkSource {
@@ -87,8 +94,8 @@ func (k *kafkaSinglePartitionWorkOrchestrator) Run(ctx context.Context, wg *sync
 		select {
 		case <-ctx.Done():
 			return
-		case offset := <-k.workDispatcher.WorkStartedChannel():
-			k.start(offset)
+		case workSource := <-k.workStartedChan:
+			k.start(workSource)
 		case workSource := <-k.responseChan:
 			k.complete(workSource)
 		case <-ticker.C:
@@ -98,7 +105,13 @@ func (k *kafkaSinglePartitionWorkOrchestrator) Run(ctx context.Context, wg *sync
 	}
 }
 
-func (k *kafkaSinglePartitionWorkOrchestrator) start(offset kafka.TopicPartition) {
+func (k *kafkaSinglePartitionWorkOrchestrator) start(source workscheduler.WorkSource) {
+	offset, err := k.getOffset(source)
+	if err != nil {
+		log.Printf("unable to get kafka offset from work source %v: %v", source, err.Error())
+		return
+	}
+
 	k.expirationMonitor.Add(offset)
 	if err := k.inFlightMonitor.Start(offset); err != nil {
 		log.Printf("error while marking work as started: %v", err)

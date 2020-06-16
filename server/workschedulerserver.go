@@ -50,6 +50,9 @@ func (s *WorkSchedulerServer) Poll(ctx context.Context, in *empty.Empty) (*pb.Wo
 	case <-ctx.Done():
 		return nil, errors.New("timed out while polling for work")
 	case work := <-s.workOrchestrator.WorkChannel():
+		// Notify the orchestrator that work will be sent to the worker
+		s.workOrchestrator.WorkStartedChannel() <- *work.Source
+		log.Printf("sending to worker: %v", work.Source )
 		return &work, nil
 	}
 }
