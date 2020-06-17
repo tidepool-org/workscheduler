@@ -88,6 +88,8 @@ func (k *kafkaSinglePartitionWorkOrchestrator) Run(ctx context.Context, wg *sync
 
 	wg.Add(1)
 	wdCtx, _ := context.WithCancel(ctx)
+
+	fmt.Printf("starting work orchestrator")
 	go k.workDispatcher.Run(wdCtx, wg)
 
 	for {
