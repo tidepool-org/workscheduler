@@ -116,7 +116,7 @@ func (s *WorkSchedulerServer) running(ctx context.Context, wg *sync.WaitGroup) {
 		log.Fatalf("Failed to start kafka orchestrator: %v", err)
 	}
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%v", s.Config.Port))
+	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%v", s.Config.Port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
