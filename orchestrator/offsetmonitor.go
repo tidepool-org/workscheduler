@@ -83,6 +83,15 @@ func (o *OffsetMonitor) Count() int {
 	return o.offsets.Len()
 }
 
+func (o *OffsetMonitor) Last() *kafka.TopicPartition {
+	if o.offsets.Len() == 0 {
+		return nil
+	}
+
+	last := o.offsets.Get(o.offsets.Len() - 1)
+	return &last
+}
+
 func offsetsAreEqual(a kafka.TopicPartition, b kafka.TopicPartition) bool {
 	return a.Offset == b.Offset && topicAndPartitionAreEqual(a, b)
 }

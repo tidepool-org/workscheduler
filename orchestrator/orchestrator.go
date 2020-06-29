@@ -115,8 +115,9 @@ func (k *kafkaSinglePartitionWorkOrchestrator) start(source workscheduler.WorkSo
 	}
 
 	k.expirationMonitor.Add(offset)
-	if err := k.inFlightMonitor.Start(offset); err != nil {
-		log.Printf("error while marking work as started: %v", err)
+	k.inFlightMonitor.GetWorkUpdatesChannel() <- &WorkUpdate{
+		Offset: offset,
+		Status: WorkStarted,
 	}
 }
 
@@ -128,8 +129,9 @@ func (k *kafkaSinglePartitionWorkOrchestrator) complete(src workscheduler.WorkSo
 	}
 
 	k.expirationMonitor.Remove(offset)
-	if err = k.inFlightMonitor.Complete(offset); err != nil {
-		log.Printf("could not complete work in in-flight monitor %v", err)
+	k.inFlightMonitor.GetWorkUpdatesChannel() <- &WorkUpdate{
+		Offset: offset,
+		Status: WorkCompleted,
 	}
 }
 
@@ -141,8 +143,9 @@ func (k *kafkaSinglePartitionWorkOrchestrator) expire() {
 
 	log.Printf("offets expired: %v", expired)
 	for _, offset := range expired {
-		if err := k.inFlightMonitor.Complete(offset); err != nil {
-			log.Printf("could not expire offset: %v", err)
+		k.inFlightMonitor.GetWorkUpdatesChannel() <- &WorkUpdate{
+			Offset: offset,
+			Status: WorkCompleted,
 		}
 	}
 }
